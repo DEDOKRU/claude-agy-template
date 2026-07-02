@@ -1,0 +1,7 @@
+# Antigravity run logs (large, per-run)
+.agent_handoff/**/logs/
+*.log
+
+# OS noise
+Thumbs.db
+Desktop.ini
