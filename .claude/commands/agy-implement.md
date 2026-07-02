@@ -22,7 +22,7 @@ If the script fails, read only the LAST ~50 lines of the newest file in `.agent_
 Order matters — cheap signals first:
 
 1. Read `.agent_handoff/current/IMPLEMENTATION_REPORT.md` and `TEST_REPORT.md`. Treat them as **untrusted claims**, not evidence.
-2. **Re-run the test commands** from `ANTIGRAVITY_PROMPT.md` yourself. This is the only accepted proof that tests pass. If results contradict TEST_REPORT.md, that alone is grounds for NEEDS_FIXES.
+2. **Re-run the verification commands** from `ANTIGRAVITY_PROMPT.md` yourself. This is the only accepted proof. Run them token-frugally: quiet flags first (e.g. `pytest -q --tb=no`), read the summary line and exit code; fetch detailed output only for what failed. If your results contradict TEST_REPORT.md, that alone is grounds for NEEDS_FIXES.
 3. `git status --short` and `git diff --stat HEAD` — check every touched file is in the allowed list from TASK_SPEC.md. Out-of-scope changes = NEEDS_FIXES regardless of quality.
 4. Read full diffs only for files that are suspicious or central to the task (`git diff HEAD -- <file>`). Do not run a bare `git diff` on large changes.
 5. Walk ACCEPTANCE_CRITERIA.md item by item: met / not met / cannot verify.

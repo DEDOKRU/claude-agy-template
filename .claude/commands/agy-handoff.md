@@ -22,7 +22,9 @@ Rules:
 
 `.agent_handoff/current/ANTIGRAVITY_PROMPT.md`
 - Task-specific guidance: relevant file paths, conventions to follow, gotchas.
-- **Test commands** section: the exact shell commands to run tests, and what "passing" looks like. These same commands will be re-run by the reviewer, so they must work non-interactively.
+- **Verification commands** section: the exact non-interactive shell commands the reviewer will run to confirm the task is done, and what "passing" looks like. Match the command to the task type:
+  - long-lived code (engines, libraries, shared modules): a test suite (e.g. `pytest -q`); new logic must come with tests written by the implementer;
+  - one-off research/experiment scripts: a plain run (e.g. `python run_x.py`) plus sanity criteria in ACCEPTANCE_CRITERIA.md (produces expected output, counts > 0, metrics in plausible ranges, no lookahead). Do NOT demand unit tests for throwaway experiment code.
 - Report size limits: IMPLEMENTATION_REPORT.md and TEST_REPORT.md each under 80 lines.
 
 5. Delete stale `.agent_handoff/current/IMPLEMENTATION_REPORT.md`, `TEST_REPORT.md`, `REVIEW_NOTES.md` if left over from a previous task.

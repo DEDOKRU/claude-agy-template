@@ -9,8 +9,8 @@
 ## Gotchas
 <known traps: platform issues, flaky areas, ordering requirements>
 
-## Test commands
-Run these exactly; they must work non-interactively (the reviewer re-runs the same commands):
+## Verification commands
+Run these exactly; they must work non-interactively (the reviewer re-runs the same commands to accept the work). For long-lived code this is a test suite; for one-off research scripts a plain run + sanity criteria is enough:
 
 ```powershell
 <e.g. npm test / pytest -q / dotnet test>

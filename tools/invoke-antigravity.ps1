@@ -75,7 +75,7 @@ if ($Continue) {
 Continue the previous task. The reviewer left feedback in $reviewNotes.
 
 1. Read $reviewNotes and fix every listed issue. Do not expand scope beyond it.
-2. Re-run the tests specified in $agyPrompt.
+2. Re-run the verification commands specified in $agyPrompt.
 3. Update $TaskDir/IMPLEMENTATION_REPORT.md and $TaskDir/TEST_REPORT.md (keep each under 80 lines).
 4. TEST_REPORT.md must contain the exact commands you ran and their real results. Do not fabricate results.
 5. Stop after implementation and testing. Do not commit.
@@ -92,7 +92,7 @@ Read these files first:
 Hard rules:
 1. Follow TASK_SPEC.md exactly. Do not expand scope or redesign architecture.
 2. Do not touch files outside the allowed list in TASK_SPEC.md.
-3. Run the tests specified in ANTIGRAVITY_PROMPT.md. If they fail, fix the code and re-run.
+3. Run the verification commands specified in ANTIGRAVITY_PROMPT.md. If they fail, fix the code and re-run.
 4. Write $TaskDir/IMPLEMENTATION_REPORT.md (what changed and why, under 80 lines).
 5. Write $TaskDir/TEST_REPORT.md with the exact commands run and their real output summary (under 80 lines). Do not fabricate results.
 6. Do not commit. Stop after implementation and testing.
