@@ -9,39 +9,37 @@ Claude Code  -> перезапускает тесты сам + читает diff
 ты           -> commit / merge вручную
 ```
 
-## Как склонировать под новый проект
+## Установка из GitHub — одна и та же команда для нового и существующего проекта
+
+Открой PowerShell **в папке проекта** и вставь этот блок (он всегда одинаковый, менять ничего не нужно):
 
 ```powershell
-# 1. Скопируй шаблон (или git clone, если выложишь в remote)
-Copy-Item -Recurse C:\AI\claude_agy C:\AI\my_new_project
-Set-Location C:\AI\my_new_project
-Remove-Item -Recurse -Force .git
-git init -b main
-git add -A; git commit -m "init from claude_agy template"
-
-# 2. Добавь новую папку в trusted workspaces (иначе headless-запуски будут виснуть).
-# Либо один раз интерактивно: agy -> подтвердить trust -> /quit,
-# либо просто допиши путь в ~/.gemini/antigravity-cli/settings.json:
-#   "trustedWorkspaces": [ ..., "C:\\AI\\my_new_project" ]
+$t = "$env:TEMP\agy-tpl"
+if (Test-Path $t) { Remove-Item -Recurse -Force $t }
+git clone --depth 1 https://github.com/DEDOKRU/claude-agy-template.git $t
+powershell -ExecutionPolicy Bypass -File $t\tools\install-into-project.ps1 -Target .
+Remove-Item -Recurse -Force $t
 ```
 
-Дальше — обычный цикл в Claude Code: `/agy-handoff <задача>`, затем `/agy-implement`.
-
-## Как подключить к СУЩЕСТВУЮЩЕМУ проекту
-
-Одна команда (из папки шаблона):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\install-into-project.ps1 -Target C:\path\to\project
-```
+Что происходит: свежая копия шаблона скачивается с GitHub во временную папку, установщик добавляет workflow в текущий проект, временная папка удаляется. Репозиторий приватный — авторизацию даёт Git Credential Manager, токены не нужны.
 
 Установщик идемпотентен (можно перезапускать), ничего не перезаписывает:
 - копирует скрипт-мост, команды `/agy-handoff` + `/agy-implement` и шаблоны handoff;
 - **дописывает** секцию правил в существующий `CLAUDE.md` (или создаёт его);
 - **дописывает** `.agent_handoff/**/logs/` в `.gitignore`;
-- добавляет путь проекта в `trustedWorkspaces` agy.
+- добавляет путь проекта в `trustedWorkspaces` agy (без этого headless-запуски agy виснут).
 
-После установки: проверь `git status`, закоммить новые файлы — и цикл готов к работе.
+После установки: проверь `git status`, закоммить новые файлы — цикл готов.
+
+### Новый проект с нуля
+
+1. github.com/DEDOKRU/claude-agy-template → кнопка **Use this template** → Create a new repository → имя нового репо.
+2. `git clone https://github.com/DEDOKRU/<имя>.git C:\AI\<папка>` — файлы workflow уже внутри.
+3. В папке проекта выполни тот же блок установки, что выше — файлы он пропустит (уже есть), но зарегистрирует папку в `trustedWorkspaces`.
+
+### Существующий проект
+
+Только шаг с блоком установки — всё.
 
 ## Разовая настройка машины (уже сделано, если читаешь это на исходной машине)
 
