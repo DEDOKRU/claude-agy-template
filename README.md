@@ -19,9 +19,10 @@ Remove-Item -Recurse -Force .git
 git init -b main
 git add -A; git commit -m "init from claude_agy template"
 
-# 2. Первый раз в этой папке запусти agy интерактивно и подтверди trust workspace
-agy
-# внутри: /quit
+# 2. Добавь новую папку в trusted workspaces (иначе headless-запуски будут виснуть).
+# Либо один раз интерактивно: agy -> подтвердить trust -> /quit,
+# либо просто допиши путь в ~/.gemini/antigravity-cli/settings.json:
+#   "trustedWorkspaces": [ ..., "C:\\AI\\my_new_project" ]
 ```
 
 Дальше — обычный цикл в Claude Code: `/agy-handoff <задача>`, затем `/agy-implement`.
@@ -51,3 +52,10 @@ CLAUDE.md                          # правила для Claude в этом р
 - `--print-timeout 30m` (дефолтные 5 минут agy обрезали бы реальную задачу).
 - Отчёты agy считаются недоверенными: Claude обязан сам перезапустить тесты перед вердиктом ACCEPT.
 - Claude не коммитит, не мержит и не пушит — это делаешь ты.
+
+## Проверено на живом прогоне (2026-07-02)
+
+- Полный цикл handoff -> agy -> ревью пройден (ветка `agy/smoke-test`), вердикт ACCEPT.
+- В print-режиме agy сам подтверждает свои тулы (запись файлов, команды) при `--sandbox` — `-SkipPermissions` для обычных задач не нужен.
+- Грабли, уже учтённые в скрипте: agy виснет на открытом stdin (скрипт закрывает его через `$null |`); дефолтный print-timeout agy всего 5 минут (скрипт ставит 30); agy молча самообновляется при старте (разовая пауза до пары минут — это не зависание).
+- `agy models` печатает список только в реальном интерактивном терминале.
