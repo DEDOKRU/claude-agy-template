@@ -112,7 +112,9 @@ $agyArgs += @("-p", $prompt)
 
 Write-Host "Running agy (timeout ${TimeoutMinutes}m, sandbox=$(-not $NoSandbox), continue=$([bool]$Continue))..." -ForegroundColor Cyan
 
-& agy @agyArgs | Tee-Object -FilePath $stdoutLog
+# $null pipe closes agy's stdin — in print mode agy waits for stdin EOF and
+# hangs forever on an open pipe (works in a real console because of the TTY).
+$null | & agy @agyArgs | Tee-Object -FilePath $stdoutLog
 $exitCode = $LASTEXITCODE
 
 # --- Result summary ---------------------------------------------------------
