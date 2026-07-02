@@ -27,6 +27,22 @@ git add -A; git commit -m "init from claude_agy template"
 
 Дальше — обычный цикл в Claude Code: `/agy-handoff <задача>`, затем `/agy-implement`.
 
+## Как подключить к СУЩЕСТВУЮЩЕМУ проекту
+
+Одна команда (из папки шаблона):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\install-into-project.ps1 -Target C:\path\to\project
+```
+
+Установщик идемпотентен (можно перезапускать), ничего не перезаписывает:
+- копирует скрипт-мост, команды `/agy-handoff` + `/agy-implement` и шаблоны handoff;
+- **дописывает** секцию правил в существующий `CLAUDE.md` (или создаёт его);
+- **дописывает** `.agent_handoff/**/logs/` в `.gitignore`;
+- добавляет путь проекта в `trustedWorkspaces` agy.
+
+После установки: проверь `git status`, закоммить новые файлы — и цикл готов к работе.
+
 ## Разовая настройка машины (уже сделано, если читаешь это на исходной машине)
 
 1. Antigravity CLI установлен, `agy` в PATH (`agy --version`).
