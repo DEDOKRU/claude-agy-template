@@ -27,5 +27,5 @@ Rules:
   - one-off research/experiment scripts: a plain run (e.g. `python run_x.py`) plus sanity criteria in ACCEPTANCE_CRITERIA.md (produces expected output, counts > 0, metrics in plausible ranges, no lookahead). Do NOT demand unit tests for throwaway experiment code.
 - Report size limits: IMPLEMENTATION_REPORT.md and TEST_REPORT.md each under 80 lines.
 
-5. Delete stale `.agent_handoff/current/IMPLEMENTATION_REPORT.md`, `TEST_REPORT.md`, `REVIEW_NOTES.md` if left over from a previous task.
+5. Delete stale `.agent_handoff/current/IMPLEMENTATION_REPORT.md`, `TEST_REPORT.md`, `REVIEW_NOTES.md`, `SESSION_STATE.md` if left over from a previous task.
 6. Finish by telling the user the handoff is ready and to run `/agy-implement`.

@@ -42,7 +42,9 @@ $copies = @(
     @{ Src = ".claude\commands\agy-implement.md";       Dst = ".claude\commands\agy-implement.md" },
     @{ Src = ".agent_handoff\templates\TASK_SPEC.md";   Dst = ".agent_handoff\templates\TASK_SPEC.md" },
     @{ Src = ".agent_handoff\templates\ACCEPTANCE_CRITERIA.md"; Dst = ".agent_handoff\templates\ACCEPTANCE_CRITERIA.md" },
-    @{ Src = ".agent_handoff\templates\ANTIGRAVITY_PROMPT.md";  Dst = ".agent_handoff\templates\ANTIGRAVITY_PROMPT.md" }
+    @{ Src = ".agent_handoff\templates\ANTIGRAVITY_PROMPT.md";  Dst = ".agent_handoff\templates\ANTIGRAVITY_PROMPT.md" },
+    @{ Src = ".agent_handoff\templates\SESSION_STATE.md";       Dst = ".agent_handoff\templates\SESSION_STATE.md" },
+    @{ Src = ".agent_handoff\templates\PROJECT_MAP.md";         Dst = ".agent_handoff\templates\PROJECT_MAP.md" }
 )
 
 foreach ($c in $copies) {
@@ -80,6 +82,14 @@ Rules for Claude:
 - Prefer ``git diff --stat HEAD`` first; full diffs only per-file where needed.
 - Never commit, merge, or push on your own initiative.
 - The bridge script refuses to run on ``main``/``master`` and creates a checkpoint commit before every run; rollback with ``git reset --hard <checkpoint>``.
+
+Token discipline:
+- Do not read the whole repository; use targeted searches and targeted file reads only.
+- Default to quiet flags on commands; read long output via tail and only for failures.
+- Keep answers short: files changed, commands run, result, risks. No long recaps.
+- If PROJECT_MAP.md exists at the repo root, read it before exploring the codebase.
+- If a task spans multiple sessions, maintain ``.agent_handoff/current/SESSION_STATE.md`` (current step, verified, remaining, do-not-repeat) so a fresh session resumes from files, not chat memory.
+- When compacting context, preserve: active task, changed files, decisions made, verification command, next exact step. Drop failed attempts and old discussion.
 "@
 
 if ((Test-Path $claudeMd) -and (Select-String -Path $claudeMd -Pattern $marker -Quiet)) {

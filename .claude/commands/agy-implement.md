@@ -36,3 +36,7 @@ State exactly one:
 
 Never commit, merge, or push. The user does that after reading your verdict.
 Never mark ACCEPT if you did not re-run the tests yourself.
+
+## Session state
+
+If this cycle spans multiple sessions (long agy run, usage limit, interruption), maintain `.agent_handoff/current/SESSION_STATE.md` from the template in `.agent_handoff/templates/`: current step, verified so far, remaining, do-not-repeat, next exact action. Update it after each significant step instead of writing long recaps into chat. Delete it once the task is ACCEPTed.
