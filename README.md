@@ -1,17 +1,28 @@
-# claude_agy — шаблон связки Claude Code + Antigravity CLI
+# claude-agy-template
 
-Шаблон проекта для экономии токенов Claude: Claude проектирует и ревьюит, Antigravity (`agy`) пишет код и гоняет тесты, PowerShell-скрипт связывает их, git-ветка страхует.
+**English** | [Deutsch](README.de.md) | [Русский](README.ru.md)
+
+A project template that pairs **Claude Code** (architect & reviewer) with **Antigravity CLI** (`agy`, implementer) to save Claude tokens: Claude writes the contract and reviews the result; agy writes the code and runs the tests; a PowerShell bridge connects them; a git branch acts as the safety fuse.
 
 ```text
-Claude Code  -> /agy-handoff  -> контракт (spec + критерии + промпт)
-Claude Code  -> /agy-implement -> tools/invoke-antigravity.ps1 -> agy пишет код и тестирует
-Claude Code  -> перезапускает тесты сам + читает diff -> ACCEPT / NEEDS_FIXES / REJECT
-ты           -> commit / merge вручную
+Claude Code  -> /agy-handoff   -> contract (spec + acceptance criteria + prompt)
+Claude Code  -> /agy-implement -> tools/invoke-antigravity.ps1 -> agy implements & tests
+Claude Code  -> re-runs verification itself + reads the diff -> ACCEPT / NEEDS_FIXES / REJECT
+you          -> commit / merge manually
 ```
 
-## Стандартный блок установки
+Why it saves tokens: Claude never writes boilerplate, never babysits test runs, never re-reads the whole project. The expensive work (implementation, red-test debugging, reruns) happens on the Gemini side via Antigravity.
 
-Один и тот же блок для всех сценариев ниже. Открой PowerShell **в папке проекта** и вставь как есть — менять ничего не нужно:
+## Requirements
+
+- Windows with PowerShell 5.1+ (the bridge and installer are PowerShell scripts)
+- [Claude Code](https://code.claude.com) CLI
+- [Antigravity CLI](https://antigravity.google) — `agy` in PATH, logged in once interactively
+- git
+
+## Install — the same block for new and existing projects
+
+Open PowerShell **in your project folder** and paste this block as-is:
 
 ```powershell
 $t = "$env:TEMP\agy-tpl"
@@ -21,96 +32,84 @@ powershell -ExecutionPolicy Bypass -File $t\tools\install-into-project.ps1 -Targ
 Remove-Item -Recurse -Force $t
 ```
 
-Что происходит: свежая копия шаблона скачивается с GitHub во временную папку, установщик добавляет workflow в текущий проект (`-Target .` — текущая папка), временная папка удаляется. Репозиторий приватный — авторизацию даёт Git Credential Manager, токены не нужны.
+The installer is idempotent (safe to re-run) and never overwrites your content:
 
-Установщик идемпотентен (можно перезапускать), ничего не перезаписывает:
-- копирует скрипт-мост, команды `/agy-handoff` + `/agy-implement` и шаблоны handoff;
-- **дописывает** секцию правил в существующий `CLAUDE.md` (или создаёт его);
-- **дописывает** `.agent_handoff/**/logs/` в `.gitignore`;
-- добавляет путь проекта в `trustedWorkspaces` agy (без этого headless-запуски agy виснут).
+- copies the bridge script, the `/agy-handoff` + `/agy-implement` commands and the handoff templates;
+- **appends** a rules section to your existing `CLAUDE.md` (or creates one);
+- **appends** `.agent_handoff/**/logs/` to `.gitignore`;
+- registers the project path in agy's `trustedWorkspaces` (headless agy runs hang without it).
 
-## Сценарий 1: новый проект с нуля
+### Scenario 1: brand-new project
 
-1. **Создай репо из шаблона (в браузере).** github.com/DEDOKRU/claude-agy-template → кнопка **Use this template** → **Create a new repository** → имя проекта → Private → Create. Новый репо получает файлы workflow с чистой историей.
-2. **Склонируй на диск:**
-   ```powershell
-   git clone https://github.com/DEDOKRU/<имя>.git C:\AI\<папка>
-   cd C:\AI\<папка>
-   ```
-3. **Выполни стандартный блок установки** (ты уже в папке проекта). По всем файлам будет `already present, skipped` — это нормально; важна строка `added to agy trustedWorkspaces`.
-4. Запусти Claude Code в папке проекта — рабочий цикл готов.
+1. **Use this template** button on GitHub → create your repository.
+2. `git clone` it locally.
+3. Run the install block inside the folder — files are skipped (already there), but the workspace gets registered with agy.
 
-## Сценарий 2: существующий проект
+### Scenario 2: existing project
 
-1. **Проверь, что проект — git-репозиторий.** Если нет: `git init` + первый коммит. Установщик без git откажется работать.
-2. **Выполни стандартный блок установки** из папки проекта. Он скопирует файлы workflow, допишет `CLAUDE.md` и `.gitignore`, зарегистрирует папку у agy.
-3. **Посмотри и закоммить:**
-   ```powershell
-   git status
-   git add -A
-   git commit -m "add agy delegation workflow"
-   ```
-4. **Перезапусти Claude Code**, если он был открыт в этом проекте — чтобы подхватились новые команды и обновлённый `CLAUDE.md`.
+1. Make sure it is a git repository with at least one commit (`git init` + initial commit if not — the checkpoint/rollback/diff mechanics need a baseline).
+2. Run the install block, review `git status`, commit.
+3. Restart Claude Code in the project so the new commands load.
 
-## Сценарий 3: обновить workflow в уже подключённом проекте
+### Scenario 3: updating an already-connected project
 
-Установщик намеренно не перезаписывает существующие файлы (чтобы не затереть локальные правки), поэтому обновление — через удаление старых копий:
+The installer deliberately never overwrites existing files, so updating goes through deletion:
 
 ```powershell
 Remove-Item tools\invoke-antigravity.ps1, .claude\commands\agy-handoff.md, .claude\commands\agy-implement.md
 ```
 
-Затем стандартный блок установки — он положит свежие версии с GitHub.
+Then run the install block again — it fetches fresh copies.
 
-## Рабочий цикл (одинаковый во всех проектах)
+## The working cycle
 
-1. В Claude Code: `/agy-handoff <описание задачи>` — Claude создаёт рабочую ветку `agy/<имя>` и контракт: что делать, какие файлы можно трогать, какие тесты гонять, критерии приёмки.
-2. `/agy-implement` — скрипт делает checkpoint-коммит, agy пишет код и гоняет тесты (обычно 5–30 минут), затем Claude ревьюит: сам перезапускает тесты, сверяет diff со списком разрешённых файлов, проходит по критериям.
-3. По вердикту:
-   - **ACCEPT** — ты делаешь merge в main (или PR).
-   - **NEEDS_FIXES** — замечания уже в `REVIEW_NOTES.md`; запускаешь `/agy-implement continue`, agy правит в той же сессии, Claude ревьюит заново.
-   - **REJECT** — откат: `git reset --hard <checkpoint>` (хэш печатает скрипт) и новый handoff с другой постановкой.
+1. `/agy-handoff <task description>` — Claude creates a work branch `agy/<name>` and the contract: what to do, which files may be touched, how to verify, acceptance criteria.
+2. `/agy-implement` — the bridge makes a checkpoint commit, agy implements and verifies (typically 5–30 min), then Claude reviews: re-runs the verification commands itself, checks the diff against the allowed-files list, walks the acceptance criteria.
+3. Verdict:
+   - **ACCEPT** — you merge (or open a PR).
+   - **NEEDS_FIXES** — feedback is already in `REVIEW_NOTES.md`; run `/agy-implement continue`, agy fixes within the same conversation, Claude re-reviews.
+   - **REJECT** — roll back with `git reset --hard <checkpoint>` (hash printed by the script) and write a new handoff.
 
-Ручные действия во всём цикле — только команды из пунктов 1–2 и финальный merge: Claude не коммитит, не мержит и не пушит, это предохранитель.
+The only manual actions in the whole cycle are the two commands above and the final merge: Claude never commits, merges or pushes — that is a safety fuse.
 
-## Разовая настройка машины (уже сделано, если читаешь это на исходной машине)
+## Safety fuses
 
-1. Antigravity CLI установлен, `agy` в PATH (`agy --version`).
-2. Один раз `agy` интерактивно: Google OAuth + trust workspace.
-3. Модель по умолчанию задаётся в agy; список — `agy models`. Можно переопределить: `/agy-implement` -> скрипт с `-Model "<имя>"`.
+- The bridge refuses to run on `main`/`master` and without handoff files.
+- A checkpoint commit before every agy run: `git diff HEAD` shows exactly the agent's changes; rollback is one command.
+- agy runs with `--sandbox`; `--dangerously-skip-permissions` is only accepted together with sandbox mode.
+- `--print-timeout 30m` (agy's 5-minute default would cut off real tasks).
+- agy's reports are treated as untrusted input: Claude must re-run the verification commands itself before an ACCEPT.
+- Verification commands match the task type: a test suite for long-lived code, a plain run + sanity criteria for one-off research scripts.
 
-## Структура
+## Token hygiene (your habits — the template cannot automate these)
+
+- **`/clear` after every completed task.** One endless session across 20 tasks is the biggest limit-killer: stale context is billed on every message. `/rename <name>` first if you may need to come back.
+- **Corrected Claude twice? Don't correct a third time.** The context is polluted; `/clear` plus a sharper prompt is cheaper and works better.
+- **Check `/context` and `/mcp` periodically.** Unused MCP servers cost context on every message — disable what the current work doesn't need.
+- **`/compact` with instructions, not bare**: `/compact keep only the active task, changed files, decisions, verification command and next step` (the same rule is baked into the project `CLAUDE.md`, so auto-compaction honors it too).
+- **Add a `PROJECT_MAP.md`** at the repo root for bigger projects (template in `.agent_handoff/templates/`) — Claude reads the map instead of walking the tree.
+- **Interrupted work resumes from a file, not from chat memory**: project rules require maintaining `.agent_handoff/current/SESSION_STATE.md` for multi-session tasks — a fresh session starts from it instead of re-deriving context.
+
+## Pitfalls discovered on live runs (already handled by the scripts)
+
+- agy in `-p` print mode waits for stdin EOF and hangs forever on an open pipe — the bridge closes stdin via a `$null |` pipe.
+- A workspace missing from `trustedWorkspaces` (`~/.gemini/antigravity-cli/settings.json`) makes headless runs hang — the installer registers it.
+- agy silently self-updates on launch (a download that can look like a hang — it is a one-off pause).
+- agy's default print timeout is only 5 minutes — the bridge sets 30.
+- `agy models` only prints its list in a real interactive terminal.
+- PowerShell 5.1 reads BOM-less scripts in the ANSI codepage: a UTF-8 em dash becomes a smart quote that breaks string parsing — both scripts are pure ASCII for that reason.
+
+## Repository layout
 
 ```text
-.claude/commands/agy-handoff.md    # Claude: создать контракт для agy
-.claude/commands/agy-implement.md  # Claude: запустить agy и отревьюить
-tools/invoke-antigravity.ps1       # мост: проверки, checkpoint, запуск agy, сводка
-.agent_handoff/current/            # рабочие файлы текущей задачи
-.agent_handoff/current/logs/       # сырые логи agy (в .gitignore, Claude их не читает)
-CLAUDE.md                          # правила для Claude в этом репо
+.claude/commands/agy-handoff.md    # Claude: create the contract for agy
+.claude/commands/agy-implement.md  # Claude: run agy and review
+tools/invoke-antigravity.ps1       # bridge: checks, checkpoint, agy run, summary
+tools/install-into-project.ps1     # installer for new/existing projects
+.agent_handoff/templates/          # contract, session-state and project-map templates
+CLAUDE.md                          # rules for Claude in this repo
 ```
 
-## Предохранители
+## License
 
-- Скрипт отказывается работать на `main`/`master` и без handoff-файлов.
-- Перед запуском agy — checkpoint-коммит: `git diff HEAD` показывает ровно правки агента, откат = `git reset --hard <checkpoint>`.
-- agy запускается с `--sandbox`; `--dangerously-skip-permissions` скрипт принимает только вместе с sandbox.
-- `--print-timeout 30m` (дефолтные 5 минут agy обрезали бы реальную задачу).
-- Отчёты agy считаются недоверенными: Claude обязан сам перезапустить тесты перед вердиктом ACCEPT.
-- Claude не коммитит, не мержит и не пушит — это делаешь ты.
-
-## Гигиена токенов (твои привычки, шаблон это не автоматизирует)
-
-- **`/clear` после каждой завершённой задачи.** Одна бесконечная сессия на 20 задач — главный пожиратель лимита: устаревший контекст оплачивается в каждом сообщении. Если к задаче надо будет вернуться — сначала `/rename <имя>`, потом `/clear`.
-- **Исправлял Claude дважды — не исправляй третий раз.** Контекст уже загрязнён; `/clear` и новый точный промпт дешевле и работает лучше.
-- **`/context` и `/mcp` периодически.** Неиспользуемые MCP-серверы висят в контексте каждого сообщения — отключай те, что не нужны для текущей работы.
-- **`/compact` с инструкцией, а не голый**: `/compact сохрани только активную задачу, изменённые файлы, решения, команду проверки и следующий шаг` (правило про это также вшито в CLAUDE.md проектов — авто-компакт его учитывает).
-- **Для больших проектов заведи `PROJECT_MAP.md`** в корне (шаблон в `.agent_handoff/templates/`) — Claude читает карту вместо обхода дерева.
-- **Прерванная задача продолжается по файлу, а не по памяти**: правила проектов требуют вести `.agent_handoff/current/SESSION_STATE.md` при многосессионной работе — новая сессия стартует с него (`claude --continue` + «прочитай SESSION_STATE.md»), не восстанавливая контекст за токены.
-
-## Проверено на живом прогоне (2026-07-02)
-
-- Полный цикл handoff -> agy -> ревью пройден (ветка `agy/smoke-test`), вердикт ACCEPT.
-- В print-режиме agy сам подтверждает свои тулы (запись файлов, команды) при `--sandbox` — `-SkipPermissions` для обычных задач не нужен.
-- Грабли, уже учтённые в скрипте: agy виснет на открытом stdin (скрипт закрывает его через `$null |`); дефолтный print-timeout agy всего 5 минут (скрипт ставит 30); agy молча самообновляется при старте (разовая пауза до пары минут — это не зависание).
-- `agy models` печатает список только в реальном интерактивном терминале.
+[MIT](LICENSE)
