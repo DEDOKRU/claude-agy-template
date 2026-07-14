@@ -72,6 +72,16 @@ Danach den Installationsblock erneut ausführen — er holt frische Kopien.
 
 Die einzigen manuellen Aktionen im gesamten Zyklus sind die beiden Befehle oben und der finale Merge: Claude committet, mergt und pusht nie — das ist eine Sicherung.
 
+## Delegation ist der Standard — keine Größenschwelle
+
+Das größte Leck in jedem Token-Spar-Setup ist der Agent, der entscheidet: „Diese Änderung ist zu klein, um sie zu delegieren." Die in `CLAUDE.md` installierten Regeln entfernen dieses Ermessen daher vollständig:
+
+- **Jede** Codeänderung läuft durch den agy-Zyklus — ein Einzeiler-Fix und ein 10-Dateien-Feature kosten dieselbe Delegationsrunde, also existiert keine „zu klein"-Schwelle.
+- Der einzige Auslöser für eine direkte Bearbeitung durch Claude ist deine explizite Aufforderung in der aktuellen Nachricht („mach es selbst", „ohne agy", „Schnellmodus"). Die Erlaubnis wird nie aus Kontext, Dringlichkeit oder der Offensichtlichkeit des Fixes abgeleitet.
+- Das gilt auch beim Review: ein trivialer Befund (Tippfehler, roter Test, Einzeiler) geht in `REVIEW_NOTES.md` und zurück an agy — der Reviewer „fixt" ihn nie schnell selbst.
+
+Das allgemeine Muster: Jede Anweisung, die einem Agenten die Wahl zwischen „billig per Delegation" und „teuer, aber sofort" nach eigenem Ermessen lässt, führt früher oder später dazu, dass er den teuren Weg genau dort wählt, wo das Sparen am wichtigsten war — beim Strom häufiger kleiner Änderungen. Die Regel muss das Ermessen entfernen, nicht lenken.
+
 ## Sicherungen
 
 - Die Bridge verweigert den Lauf auf `main`/`master` und ohne Handoff-Dateien.

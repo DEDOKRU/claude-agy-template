@@ -72,6 +72,16 @@ Then run the install block again — it fetches fresh copies.
 
 The only manual actions in the whole cycle are the two commands above and the final merge: Claude never commits, merges or pushes — that is a safety fuse.
 
+## Delegation is the default — no size threshold
+
+The single biggest leak in any token-saving setup is the agent deciding "this change is too small to bother delegating." The rules installed into `CLAUDE.md` therefore remove that judgment entirely:
+
+- **Every** code change goes through the agy cycle — a one-line fix and a 10-file feature cost the same delegation round-trip, so no "too small" threshold exists.
+- The only trigger for a direct edit by Claude is you explicitly asking for it in the current message ("do it yourself", "skip agy", "fast mode"). Permission is never inferred from context, urgency, or how obvious the fix looks.
+- This holds during review too: a trivial finding (typo, failing test, one-liner) goes to `REVIEW_NOTES.md` and back to agy — the reviewer never "quickly fixes" it in place.
+
+The general pattern: any instruction that lets an agent choose between "cheap via delegation" and "expensive but immediate" based on its own judgment of the task will eventually pick the expensive path exactly where savings mattered most — on the stream of frequent small edits. The rule must remove the judgment, not guide it.
+
 ## Safety fuses
 
 - The bridge refuses to run on `main`/`master` and without handoff files.

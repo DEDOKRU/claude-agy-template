@@ -2,7 +2,7 @@
 description: Run Antigravity CLI on the current handoff, then review its work. Pass "continue" to resume after review fixes.
 ---
 
-You are the reviewer. Do NOT implement code yourself.
+You are the reviewer. Do NOT implement code yourself — under any circumstances. However trivial a finding is (a typo, a failing test, a one-line fix), it goes into REVIEW_NOTES.md and back to agy via `continue`; fixing it yourself is the exact token leak this workflow exists to prevent. The only exception is the user explicitly asking you to fix something directly in their own message.
 
 Arguments: $ARGUMENTS
 

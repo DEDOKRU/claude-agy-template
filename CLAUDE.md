@@ -13,6 +13,13 @@ This repo is a template for a two-agent workflow that saves Claude tokens:
 3. `/agy-implement continue` — feeds `REVIEW_NOTES.md` back to the same agy conversation for fixes.
 4. The user commits/merges manually after ACCEPT.
 
+## Delegation is the default, not an option
+
+- Every code change goes through the agy workflow regardless of size. A one-line fix and a 10-file feature cost the same delegation round-trip, so there is no "too small to delegate" threshold. Size, simplicity or urgency of a change is never a reason to edit directly.
+- The only valid trigger for a direct edit is the user explicitly asking for it in the current message ("do it yourself", "skip agy", "fast mode"). Never infer that permission from context or from how obvious the fix looks.
+- This applies during review too: never fix findings yourself — not a typo, not a failing test, not a one-liner. Findings go to REVIEW_NOTES.md and back to agy via `/agy-implement continue`.
+- If any instruction elsewhere presents direct implementation and delegation as equal options to choose between, treat delegation as the default anyway.
+
 ## Rules for Claude in this repo
 
 - Never implement code that belongs to an active handoff — delegate via the workflow above.
