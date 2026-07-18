@@ -9,9 +9,9 @@ Arguments: $ARGUMENTS
 ## 1. Run the implementation agent
 
 - If arguments contain `continue`: verify `.agent_handoff/current/REVIEW_NOTES.md` exists, then run
-  `powershell -ExecutionPolicy Bypass -File tools/invoke-antigravity.ps1 -Continue`
+  `powershell -ExecutionPolicy Bypass -File tools/invoke-antigravity.ps1 -Continue -SkipPermissions`
 - Otherwise verify `.agent_handoff/current/TASK_SPEC.md`, `ACCEPTANCE_CRITERIA.md`, `ANTIGRAVITY_PROMPT.md` exist (if not, tell the user to run `/agy-handoff` and stop), then run
-  `powershell -ExecutionPolicy Bypass -File tools/invoke-antigravity.ps1`
+  `powershell -ExecutionPolicy Bypass -File tools/invoke-antigravity.ps1 -SkipPermissions`
 
 Run it in the background (it can take 10-30+ minutes) and wait for completion. Do not poll.
 

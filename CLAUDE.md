@@ -42,5 +42,5 @@ This repo is a template for a two-agent workflow that saves Claude tokens:
 `powershell -ExecutionPolicy Bypass -File tools/invoke-antigravity.ps1 [-Continue] [-Model <name>] [-TimeoutMinutes 30] [-NoSandbox] [-SkipPermissions]`
 
 - `-Model` names come from `agy models`; empty uses the agy default.
-- `-SkipPermissions` is only accepted together with sandbox mode.
+- `-SkipPermissions` is only accepted together with sandbox mode. It is required for headless runs: without it agy auto-denies its own tool permissions and the run exits 0 having implemented nothing.
 - Rollback after a bad run: `git reset --hard <checkpoint hash printed by the script>`.
